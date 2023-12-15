@@ -1,2 +1,14 @@
 # XPTracker
-my first wow addon using lua, sry for the spaghetti im still learning
+
+**Note:** XPTracker is still in its early development, so bugs might occur.
+
+## Description
+XPTracker allows you to track your XP while leveling. It displays three different stats:
+- **XP Gained:** The amount of XP you have gained since logging in.
+- **XP Left for Level Up:** The amount of XP needed in order to level up.
+- **XP Estimated per Hour:** The estimated XP per hour.
+
+## Usage
+- Type `/xp` to toggle the XP window on or off.
+- Type `/xp lock` to lock the XP window.
+- Type `/xp unlock` to unlock the XP window.
