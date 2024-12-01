@@ -97,7 +97,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         loginTime = time()
         currentTime = loginTime
-        print(loginTime)
         local playerName = UnitName("player")
         print("Welcome back " .. playerName .. "! Let's clap some cheeks today!")
         print("XPTracker is running! Type !xp to toggle window on/off." .. "\n" .. "type /xp lock to lock window. Type /xp unlock to unlock window" .. "\n" .. "Type /xp reset to reset the XP Stats")
@@ -115,18 +114,16 @@ frame:SetScript("OnEvent", function(self, event, ...)
         currentTime = time()
         passedTime = currentTime - loginTime
         playerCurrentXP = getPlayerCurrentXP()
-        print("login xp" .. tostring(loginXP))
-        print("current xp" .. tostring(playerCurrentXP))
         local xpGained = playerCurrentXP - loginXP
         local remainingXP = xpForNextLevel-playerCurrentXP;
         local xpPerHour = math.floor((xpGained/passedTime)*3600)
-        
         textestimatedXP:SetText(estimatedXPperHourString .. " " .. tostring(xpPerHour))
         textremainingXP:SetText(xpForlvlupString .. " " .. tostring(remainingXP))
         textGainedXP:SetText(gainedXPString .. " " .. tostring(xpGained))
     elseif event == "PLAYER_LEVEL_UP" then
+        ToggleXPFrame("reset")
         print("Congrats you just leveld up")
-        local soundPath = "Interface\\AddOns\\HelloWorld\\levelUpSound.mp3"  
+        local soundPath = "Interface\\AddOns\\XPTracker\\levelUpSound.mp3"  
         PlaySoundFile(soundPath, "Master")
     end
 end)
