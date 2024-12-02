@@ -1,17 +1,18 @@
 --variables used
-local loginXP = 0
 local xpForNextLevel = 0
+local playerLastXP = 0
 local playerCurrentXP = 0
 
 local loginTime = 0
 local currentTime = 0
 local passedTime = 0
+local totalGainedXP = 0
 
 local frameLocked = false
 
-local gainedXPString = "XP gained: "
-local xpForlvlupString = "XP for level up : "
-local estimatedXPperHourString = "XP per hour: "
+local gainedXPString = "XP Gained: "
+local xpForlvlupString = "XP Till LevelUp : "
+local estimatedXPperHourString = "XP/Hour: "
 
 local frame = CreateFrame("Frame", "MyHelloWorldFrame", UIParent)
 
@@ -26,6 +27,8 @@ local textestimatedXP = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 textestimatedXP:SetPoint("LEFT", 5, -15)
 
 --functions used: 
+
+
 
 local function getPlayerCurrentXP()
     return UnitXP("player")
@@ -52,7 +55,7 @@ local function ToggleXPFrame(cmd)
 
     if cmd == "reset" then
         print("XP Stats reset")
-        loginXP = getPlayerCurrentXP()
+        playerLastXP = getPlayerCurrentXP()
         totalXPGained = 0 -- Reset total XP gained
         textGainedXP:SetText(gainedXPString .. " " .. tostring(0))
         textestimatedXP:SetText(estimatedXPperHourString .. " " .. tostring(0))
@@ -100,30 +103,37 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local playerName = UnitName("player")
         print("Welcome back " .. playerName .. "! Let's clap some cheeks today!")
         print("XPTracker is running! Type !xp to toggle window on/off." .. "\n" .. "type /xp lock to lock window. Type /xp unlock to unlock window" .. "\n" .. "Type /xp reset to reset the XP Stats")
-        loginXP = getPlayerCurrentXP()
+        playerLastXP = getPlayerCurrentXP()
         xpForNextLevel = getNextLevelXP()
         playerCurrentXP = getPlayerCurrentXP()
+        totalGainedXP = 0  -- Initialize total XP gained
 
-        local remainingXP = xpForNextLevel-playerCurrentXP;
-
+        local remainingXP = xpForNextLevel - playerCurrentXP 
         textestimatedXP:SetText(estimatedXPperHourString .. " " .. tostring(0))
         textremainingXP:SetText(xpForlvlupString .. " " .. tostring(remainingXP))
-        
+
         frame:Show()
     elseif event == "PLAYER_XP_UPDATE" then
         currentTime = time()
         passedTime = currentTime - loginTime
         playerCurrentXP = getPlayerCurrentXP()
-        local xpGained = playerCurrentXP - loginXP
-        local remainingXP = xpForNextLevel-playerCurrentXP;
-        local xpPerHour = math.floor((xpGained/passedTime)*3600)
+        local xpGained = playerCurrentXP - playerLastXP
+        -- Check if xpGained is negative (level-up scenario)
+        if xpGained < 0 then
+            xpGained = (xpForNextLevel - playerLastXP) + playerCurrentXP
+            xpForNextLevel = getNextLevelXP()
+        end
+        playerLastXP = playerCurrentXP
+        totalGainedXP = totalGainedXP + xpGained  -- Update total XP gained
+        local remainingXP = xpForNextLevel - playerCurrentXP
+        local xpPerHour = math.floor((totalGainedXP / passedTime) * 3600)
         textestimatedXP:SetText(estimatedXPperHourString .. " " .. tostring(xpPerHour))
         textremainingXP:SetText(xpForlvlupString .. " " .. tostring(remainingXP))
-        textGainedXP:SetText(gainedXPString .. " " .. tostring(xpGained))
+        textGainedXP:SetText(gainedXPString .. " " .. tostring(totalGainedXP))
     elseif event == "PLAYER_LEVEL_UP" then
-        ToggleXPFrame("reset")
-        print("Congrats you just leveld up")
-        local soundPath = "Interface\\AddOns\\XPTracker\\levelUpSound.mp3"  
+        print("Congrats you just leveled up")
+        local soundPath = "Interface\\AddOns\\XPTracker\\levelUpSound.mp3"
         PlaySoundFile(soundPath, "Master")
     end
 end)
+
